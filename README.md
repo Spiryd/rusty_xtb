@@ -1,2 +1,2 @@
 # rusty_xtb
- Rust library for xtb API
+ Rust wrapper for xtb API using tungstenite 
