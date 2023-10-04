@@ -40,6 +40,15 @@ impl XApi {
         println!("Received: {:?}", &msg);
     }
 
+    pub fn logout(&mut self) {
+        let logout = r#"{
+            "command": "logout"
+        }"#;
+        self.socket.send(Message::Text(logout.to_string())).unwrap();
+        let msg = self.socket.read().expect("Error reading message").to_string();
+        println!("{}", &msg);
+    }
+
     pub fn get_all_symbols(&mut self) -> Vec<SymbolRecord> {
         let get_all = r#"{
             "command": "getAllSymbols"
@@ -50,14 +59,24 @@ impl XApi {
         data.return_data
     }
 
-    pub fn logout(&mut self) {
-        let logout = r#"{
-            "command": "logout"
-        }"#;
-        self.socket.send(Message::Text(logout.to_string())).unwrap();
+    pub fn get_symbol(&mut self, ticker: String) -> Vec<SymbolRecord> {
+        let get_sym = formatdoc!{r#"{{
+            "command": "getAllSymbols"
+            "arguments": {{
+                "symbol": "{ticker}"
+            }}
+        }}"#, ticker=ticker};
+        self.socket.send(Message::Text(get_sym.to_string())).unwrap();
         let msg = self.socket.read().expect("Error reading message").to_string();
-        println!("{}", &msg);
+        let data: SymbolResult = serde_json::from_str(&msg).unwrap();
+        data.return_data
+    }
+
+    pub fn make_trade(&mut self) -> i32 {
+        todo!()
+    }
+
+    pub fn get_trade_status(&mut self) {
+        todo!()
     }
 }
-
-

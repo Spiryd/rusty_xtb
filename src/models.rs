@@ -58,3 +58,20 @@ pub struct SymbolResult{
 	status: bool,
 	pub return_data: Vec<SymbolRecord>	
 }
+
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct TradeTransInfo{
+	cmd: i32,
+	custom_comment: String,
+	expiration: u64,
+	offset: i32,
+	order: i32,
+	price: f32,
+	sl: f32,
+	symbol: String,
+	tp: f32,
+	#[serde(rename = "type")]
+	transaction_type: i32,
+	volume: f32
+}
