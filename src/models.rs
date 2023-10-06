@@ -54,14 +54,14 @@ pub struct SymbolRecord {
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
-pub struct SymbolResult{
+pub struct SymbolResult {
 	status: bool,
 	pub return_data: Vec<SymbolRecord>	
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
-pub struct TradeTransInfo{
+pub struct TradeTransInfo {
 	cmd: i32,
 	custom_comment: String,
 	expiration: u64,

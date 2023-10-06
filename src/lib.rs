@@ -1,6 +1,6 @@
 mod models;
 
-use models::{SymbolRecord, SymbolResult};
+use models::{SymbolRecord, SymbolResult, TradeTransInfo};
 use tungstenite::{connect, Message};
 use url::Url;
 use std::env;
@@ -17,7 +17,6 @@ impl Default for XApi {
 }
 
 impl XApi {
-
     pub fn new() -> Self {
         let (socket, response) = connect(Url::parse("wss://ws.xtb.com/real").unwrap()).expect("Can't connect");
         println!("Response HTTP code: {}", response.status());
@@ -27,7 +26,7 @@ impl XApi {
     pub fn login(&mut self) {
         let userid = env::var("USER_ID").expect("You've not set the USER_ID");
         let password = env::var("PASSWORD").expect("You've not set the PASSWORD");
-        let login = formatdoc!{r#"
+        let req = formatdoc!{r#"
             {{
                 "command" : "login",
                 "arguments" : {{
@@ -35,44 +34,44 @@ impl XApi {
                     "password": "{password}"
                 }}
             }}"#, userid=userid, password=password,};
-        self.socket.send(Message::Text(login)).unwrap();
+        self.socket.send(Message::Text(req)).unwrap();
         let msg = self.socket.read().expect("Error reading message").to_string();
         println!("Received: {:?}", &msg);
     }
 
     pub fn logout(&mut self) {
-        let logout = r#"{
+        let req = r#"{
             "command": "logout"
         }"#;
-        self.socket.send(Message::Text(logout.to_string())).unwrap();
+        self.socket.send(Message::Text(req.to_string())).unwrap();
         let msg = self.socket.read().expect("Error reading message").to_string();
         println!("{}", &msg);
     }
 
     pub fn get_all_symbols(&mut self) -> Vec<SymbolRecord> {
-        let get_all = r#"{
+        let req = r#"{
             "command": "getAllSymbols"
         }"#;
-        self.socket.send(Message::Text(get_all.to_string())).unwrap();
+        self.socket.send(Message::Text(req.to_string())).unwrap();
         let msg = self.socket.read().expect("Error reading message").to_string();
         let data: SymbolResult = serde_json::from_str(&msg).unwrap();
         data.return_data
     }
 
     pub fn get_symbol(&mut self, ticker: String) -> Vec<SymbolRecord> {
-        let get_sym = formatdoc!{r#"{{
+        let req = formatdoc!{r#"{{
             "command": "getAllSymbols"
             "arguments": {{
                 "symbol": "{ticker}"
             }}
         }}"#, ticker=ticker};
-        self.socket.send(Message::Text(get_sym.to_string())).unwrap();
+        self.socket.send(Message::Text(req.to_string())).unwrap();
         let msg = self.socket.read().expect("Error reading message").to_string();
         let data: SymbolResult = serde_json::from_str(&msg).unwrap();
         data.return_data
     }
 
-    pub fn make_trade(&mut self) -> i32 {
+    pub fn make_trade(&mut self, trade_trans_info: TradeTransInfo) -> i32 {
         todo!()
     }
 
