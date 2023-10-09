@@ -1,6 +1,6 @@
-mod models;
+pub mod models;
 
-use models::{SymbolRecord, SymbolResult, TradeTransInfo};
+use models::*;
 use tungstenite::{connect, Message};
 use url::Url;
 use std::env;
@@ -18,7 +18,7 @@ impl Default for XApi {
 
 impl XApi {
     pub fn new() -> Self {
-        let (socket, response) = connect(Url::parse("wss://ws.xtb.com/real").unwrap()).expect("Can't connect");
+        let (socket, response) = connect(Url::parse("wss://ws.xtb.com/demo").unwrap()).expect("Can't connect");
         println!("Response HTTP code: {}", response.status());
         XApi { socket }
     }
@@ -54,28 +54,49 @@ impl XApi {
         }"#;
         self.socket.send(Message::Text(req.to_string())).unwrap();
         let msg = self.socket.read().expect("Error reading message").to_string();
-        let data: SymbolResult = serde_json::from_str(&msg).unwrap();
+        let data: SymbolResults = serde_json::from_str(&msg).unwrap();
         data.return_data
     }
 
-    pub fn get_symbol(&mut self, ticker: String) -> Vec<SymbolRecord> {
+    pub fn get_symbol(&mut self, ticker: &str) -> SymbolRecord {
         let req = formatdoc!{r#"{{
-            "command": "getAllSymbols"
+            "command": "getSymbol",
             "arguments": {{
                 "symbol": "{ticker}"
             }}
         }}"#, ticker=ticker};
         self.socket.send(Message::Text(req.to_string())).unwrap();
         let msg = self.socket.read().expect("Error reading message").to_string();
+        dbg!(&msg);
         let data: SymbolResult = serde_json::from_str(&msg).unwrap();
         data.return_data
     }
 
     pub fn make_trade(&mut self, trade_trans_info: TradeTransInfo) -> i32 {
-        todo!()
+        let req = formatdoc!{r#"{{
+            "command": "tradeTransaction",
+            "arguments": {{
+                "tradeTransInfo": {tti}
+            }}
+        }}"#, tti=serde_json::to_string(&trade_trans_info).unwrap()};
+        self.socket.send(Message::Text(req.to_string())).unwrap();
+        let msg = self.socket.read().expect("Error reading message").to_string();
+        dbg!(&msg);
+        let data: TradeTransResult = serde_json::from_str(&msg).unwrap();
+        data.return_data.order
+        
     }
 
-    pub fn get_trade_status(&mut self) {
-        todo!()
+    pub fn get_trade_status(&mut self, order_id: i32) {
+        let req = formatdoc!{r#"{{
+            "command": "tradeTransactionStatus",
+            "arguments": {{
+                "order": "{order_id}"
+            }}
+        }}"#, order_id=order_id};
+        self.socket.send(Message::Text(req.to_string())).unwrap();
+        let msg = self.socket.read().expect("Error reading message").to_string();
+        dbg!(&msg);
+        println!("{:?}", serde_json::from_str::<TradeTransStatusResoult>(&msg).unwrap());
     }
 }

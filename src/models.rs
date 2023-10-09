@@ -42,7 +42,7 @@ pub struct SymbolRecord {
 	swap_long: f32,
 	swap_short: f32,
 	swap_type: i32,
-	symbol: String,
+	pub symbol: String,
 	tick_size: f32,
 	tick_value: f32,
 	time: u64,
@@ -54,9 +54,16 @@ pub struct SymbolRecord {
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
-pub struct SymbolResult {
+pub struct SymbolResults {
 	status: bool,
 	pub return_data: Vec<SymbolRecord>	
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct SymbolResult {
+	status: bool,
+	pub return_data: SymbolRecord
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -74,4 +81,42 @@ pub struct TradeTransInfo {
 	#[serde(rename = "type")]
 	transaction_type: i32,
 	volume: f32
+}
+
+impl TradeTransInfo {
+	pub fn simple_buy(symbol: String, volume: f32, price: f32) -> TradeTransInfo{
+		TradeTransInfo { cmd: 0, custom_comment: "".to_string(), expiration: 1893456000000, offset: 0, order: 0, price, sl: 0.0, symbol, tp: 0.0, transaction_type: 0, volume }
+	}
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct TradeTransReturn {
+	pub order: i32
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct TradeTransResult {
+	status: bool,
+	pub return_data: TradeTransReturn
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct TradeTransStatus {
+	ask: f32,
+	bid: f32,
+	custom_comment: String,
+	message: Option<String>,
+	order: i32,
+	request_status: i32
+}
+
+
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct TradeTransStatusResoult {
+	status: bool,
+	return_data: TradeTransStatus
 }
