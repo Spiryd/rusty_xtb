@@ -1,18 +1,16 @@
-//pub mod models;
-
-use std::{thread, time};
-
 use rusty_xtb::{XApi, models::TradeTransInfo};
 use dotenv::dotenv;
-
+use std::env;
 
 fn main() {
     //loading the environment variables
     dotenv().ok();
     //connecting to API socket
-    let mut api = XApi::new();
+    let mut api = XApi::new(false);
     //logging in
-    api.login();
+    let userid = env::var("USER_ID").expect("You've not set the USER_ID");
+    let password = env::var("PASSWORD").expect("You've not set the PASSWORD");
+    api.login(&userid, &password);
     //get symbol data
     let data = api.get_symbol("PLTR.US_4");
     //let data = api.get_all_symbols();
